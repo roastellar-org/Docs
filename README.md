@@ -14,6 +14,8 @@ ArenaX is a competitive gaming tournament platform where players compete, climb 
 - [Launch Checklist](launch-checklist.md)
 - [Release Notes](release-notes.md)
 
+For a deep dive into the on-chain reward system, see the [Architecture](architecture.md) document.
+
 ## Product
 
 ArenaX combines a web-based tournament hub with on-chain reward settlement, targeting the Web3 gaming community.
