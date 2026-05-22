@@ -6,22 +6,23 @@ Central documentation repository for the Roastellar organization and the ArenaX 
 
 ArenaX is a competitive gaming tournament platform where players compete, climb leaderboards, and earn NFT-based rewards on-chain.
 
-## Documentation
+## Documentation Structure
 
-- [Architecture](architecture.md)
-- [API Overview](api-overview.md)
-- [Incident Report](incident-report.md)
-- [Launch Checklist](launch-checklist.md)
-- [Release Notes](release-notes.md)
+```
+architecture/    System, backend, and smart contract architecture
+api/             API reference and request flows
+incidents/       Postmortems for production incidents
+ops/             Deployment, monitoring, and rollback runbooks
+launch/          Launch checklist, release notes, version history
+meetings/        Meeting notes
+```
 
-For a deep dive into the on-chain reward system, see the [Architecture](architecture.md) document.
+## Related Repositories
 
-For API details, see [API Overview](api-overview.md). For operational history, see [Incident Report](incident-report.md).
-
-## Product
-
-ArenaX combines a web-based tournament hub with on-chain reward settlement, targeting the Web3 gaming community.
+- [GameBackend](https://github.com/roastellar-org/GameBackend) — backend API service
+- [DevOps](https://github.com/roastellar-org/DevOps) — infrastructure and CI/CD
+- [Docs](https://github.com/roastellar-org/Docs) — this repository
 
 ## Status
 
-Pre-launch. Documentation is being maintained as part of the release process.
+Pre-launch. Documentation is maintained as part of the release process.
