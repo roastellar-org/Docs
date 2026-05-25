@@ -1,63 +1,84 @@
-# ArenaX Architecture
+# ArenaX Architecture Overview
 
-High-level architecture of the ArenaX on-chain reward system.
+System-level view of the ArenaX platform: what it is, which components exist, and how they interact.
 
-## Overview
-
-ArenaX settles tournament rewards on-chain using a suite of Solana programs. The backend orchestrates tournaments and payout flows; the on-chain layer handles reward issuance, trading, and treasury custody.
-
-## On-Chain Components
-
-### Reward NFT Contract
-
-Mints a unique NFT for each tournament winner. The NFT encodes tournament metadata, rank, and prize amount.
-
-- Metadata: tournament ID, rank, prize share
-- Mint authority: ArenaX backend (admin wallet)
-- Transferable: yes
-
-### Marketplace Contract
-
-Allows players to trade Reward NFTs. The marketplace takes a small fee on each sale, routed to the treasury.
-
-- Listing and offer matching
-- Protocol fee: 2%
-- Payout: seller + treasury
-
-### Asset Bridge
-
-Transfers wrapped assets between chains, enabling cross-chain reward settlement for future tournament regions.
-
-- Supported chains: Solana (initial)
-- Wrapped asset standard: SPL tokens
-
-### Treasury
-
-Custody contract holding platform funds, marketplace fees, and unclaimed rewards.
-
-- Withdrawals require multisig approval
-- Fees from the marketplace flow into the treasury
-
-## Diagram
+## System Context
 
 ```mermaid
-graph TD
-    A[Players] --> B[Backend API]
-    B --> C[Reward NFT Contract]
-    B --> D[Marketplace Contract]
-    B --> E[Asset Bridge]
-    D --> F[Treasury]
-    C --> F
-    E --> F
-    F --> G[Multisig Wallet]
+graph TB
+    subgraph Players
+        U[Player Browser]
+        W[Wallet Extension]
+    end
+    subgraph ArenaX Platform
+        F[Web Frontend]
+        B[Backend API]
+        SC[Solana Programs]
+        TR[Treasury]
+    end
+    subgraph Infrastructure
+        NG[NGINX Gateway]
+        DB[(PostgreSQL)]
+        RD[(Redis)]
+        PG[Prometheus / Grafana]
+    end
+    U --> F
+    W <-->|sign messages / transactions| B
+    F --> NG
+    NG --> B
+    B --> DB
+    B --> RD
+    B --> SC
+    SC --> TR
+    B --> PG
 ```
 
-## Flows
+## Components
 
-1. **Reward issuance** — backend triggers mint after tournament completion.
-2. **Trading** — winners list NFTs on the marketplace; buyers purchase with SPL tokens.
-3. **Settlement** — fees accrue to the treasury, withdrawable by multisig.
+| Component | Responsibility | Repository |
+|-----------|---------------|------------|
+| Web Frontend | Tournament hub, wallet connect, leaderboard UI | Frontend |
+| Backend API | Auth, tournaments, rewards orchestration, leaderboards | [GameBackend](https://github.com/roastellar-org/GameBackend) |
+| Reward NFT Contract | Mint winners' NFTs | GameBackend `contracts/` |
+| Marketplace Contract | Trading of reward NFTs | GameBackend `contracts/` |
+| Asset Bridge | Cross-chain reward settlement | GameBackend `contracts/` |
+| Treasury | Custody of fees and unclaimed rewards | GameBackend `contracts/` |
+| NGINX | TLS termination, reverse proxy | [DevOps](https://github.com/roastellar-org/DevOps) |
+| PostgreSQL | Primary data store | [DevOps](https://github.com/roastellar-org/DevOps) |
+| Redis | Session cache, queue buffers | [DevOps](https://github.com/roastellar-org/DevOps) |
+| Prometheus / Grafana | Metrics and dashboards | [DevOps](https://github.com/roastellar-org/DevOps) |
 
-## Status
+## Core Flows
 
-Contracts are under development on Solana devnet. Mainnet deployment is scheduled with the v1.0 launch.
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant B as Backend
+    participant S as Solana Programs
+    participant T as Treasury
+
+    P->>B: Connect wallet + sign challenge
+    B-->>P: JWT session
+    P->>B: Register for tournament
+    B-->>P: Registration confirmed
+    Note over P,B: Tournament runs on platform
+    B->>S: Complete tournament, snapshot standings
+    S->>T: Mint Reward NFTs per prize structure
+    S-->>B: Mint receipts
+    B-->>P: Rewards visible on leaderboard
+```
+
+## Environments
+
+| Environment | Purpose | Deployed By |
+|-------------|---------|-------------|
+| Staging | Integration testing | CI on `main` pushes |
+| Production | Player-facing | CI on version tags |
+
+See [ops/deployment-guide.md](../ops/deployment-guide.md) for environment details.
+
+## Related Documents
+
+- [Backend Architecture](backend.md)
+- [Smart Contract Architecture](smart-contracts.md)
+- [API Reference](../api/overview.md)
